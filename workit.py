@@ -29,22 +29,14 @@ class get(object):
 
         # find all seriesIDs associated with the state, naics combination and
         # reassign seriesList with the list of seriesIDs
-
-        # parse input to get each state+naics combination
-        # inputs are in the form [str(state), int(naics), int(naics)... str(state)...]
-        # get 2-digit code for each state in input
-        statesURL = 'https://script.google.com/macros/s/AKfycbxYuzwcZe6pmlx-fBCeThSbufUvmxeScFy7B4Thf0n34ozIcNk/exec?'
-        statesParams = {}
         stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
         if len(stateNames) > 0 :
             for count in range(0,len(stateNames)) :
-                statesParams['state%s'%(count)] = stateNames[count]
+                stateCode = stateToCode(stateNames[count])
 
-            content = requests.get(statesURL, params=statesParams).json()
-            for stateName in content.keys() :
                 for counter in range(0,len(self.seriesList)) :
-                    if stateName == self.seriesList[counter] :
-                        self.seriesList[counter] = content[stateName]
+                    if stateNames[count] == self.seriesList[counter] :
+                        self.seriesList[counter] = stateCode
 
             # convert list object into a string to allow regex to parse
             # states are only string inputs and are two characters long
@@ -299,4 +291,4 @@ def stateToCode(state):
         elif state.lower() in stateLong.keys() :
             code = stateLong[state]
             
-    return code
+    return stateCode
