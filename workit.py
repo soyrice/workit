@@ -271,3 +271,32 @@ def export(data, tableau='none'):
     else : 
         with open(time.strftime('%a_%H_%M_%S')+'.csv', 'w') as textFile :
             data.df.to_csv(textFile, index_label='year')
+            
+def stateToCode(state):
+    stateShort = {'AK': '02','AL': '01','AR': '06','AZ': '04','CA': '08','CO': '09','CT': '10',
+ 'DC': '12','DE': '11','FL"': '13','GA': '15','HI': '16','IA': '17','ID': '18',
+ 'IL': '19','IN': '20','KS': '21','KY': '22','LA': '23','MA': '26','MD': '25',
+ 'ME': '24','MI': '27','MN': '28','MO': '30','MS': '29','MT': '31','NC': '38',
+ 'ND': '39','NE': '32','NH': '34','NJ': '35','NM': '36','NV': '33','NY': '37',
+ 'OH': '40','OK': '41','OR': '42','PA': '43','PR': '72','RI': '44','SC': '45',
+ 'SD': '46','TN': '47','TX': '48','UT': '49','VI': '78','VT': '50','WA': '53',
+ 'WI': '55','WV': '54','WY': '56'}
+    
+    stateLong = {'alaska': '02','alabama': '01','arkansas': '06','arizona': '04','california': '08',
+                 'colorado': '09','connecticut': '10','district of columbia': '12','delaware': '11',
+                 'florida"': '13','georgia': '15','hawaii': '16','iowa': '17','idaho': '18','illinois': '19',
+                 'indiana': '20','kansas': '21','kentucky': '22','louisiana': '23','massachusetts': '26','maryland': '25',
+                 'maine': '24','michigan': '27','minnesota': '28','missouri': '30','mississippi': '29','montana': '31',
+                 'north carolina': '38','north dakota': '39','nebraska': '32','new hampshire': '34','new jersey': '35',
+                 'new mexico': '36','nevada': '33','new york': '37','ohio': '40','oklahoma': '41','oregon': '42',
+                 'pennsylvania': '43','puerto rico': '72','rhode island': '44','south carolina': '45'
+                 'south dakota': '46','tennessee': '47','texas': '48','utah': '49','virgin islands': '78','vermont': '50',
+                 'washington': '53','wisconsin': '55','west virginia': '54','wyoming': '56'}
+    
+    for state in states :
+        if state in stateShort.keys() :
+            code = stateShort[state]
+        elif state.lower() in stateLong.keys() :
+            code = stateLong[state]
+            
+    return code
