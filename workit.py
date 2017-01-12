@@ -29,14 +29,40 @@ class get(object):
 
         # find all seriesIDs associated with the state, naics combination and
         # reassign seriesList with the list of seriesIDs
-        stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
-        if len(stateNames) > 0 :
-            for count in range(0,len(stateNames)) :
-                stateCode = stateToCode(stateNames[count])
+        try :
+            statesURL = 'https://script.google.com/macros/s/AKfycbxYuzwcZe6pmlx-fBCeThSbufUvmxeScFy7B4Thf0n34ozIcNk/exec?'
+            statesParams = {}
+            stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
+            if len(stateNames) > 0 :
+                for count in range(0,len(stateNames)) :
+                    statesParams['state%s'%(count)] = stateNames[count]
 
-                for counter in range(0,len(self.seriesList)) :
-                    if stateNames[count] == self.seriesList[counter] :
-                        self.seriesList[counter] = stateCode
+                content = requests.get(statesURL, params=statesParams).json()
+                for stateName in content.keys() :
+                    for counter in range(0,len(self.seriesList)) :
+                        if stateName == self.seriesList[counter] :
+                            self.seriesList[counter] = content[stateName]
+
+                # convert list object into a string to allow regex to parse
+                # states are only string inputs and are two characters long
+                inputsList = []
+                states = re.findall("'([0-9]{2})'", str(self.seriesList))
+                for count in range(0, len(states)) :
+                    try :
+                        naicsList = re.findall("%s(.*)%s"%(states[count], states[count+1]), str(self.seriesList))
+                    except :
+                        naicsList = re.findall("%s(.*)]"%(states[count]), str(self.seriesList))
+
+                inputsList.append(('%s'%(states[count]), re.findall("[0-9]+", str(naicsList))))
+        except :
+            stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
+            if len(stateNames) > 0 :
+                for count in range(0,len(stateNames)) :
+                    stateCode = stateToCode(stateNames[count])
+
+                    for counter in range(0,len(self.seriesList)) :
+                        if stateNames[count] == self.seriesList[counter] :
+                            self.seriesList[counter] = stateCode
 
             # convert list object into a string to allow regex to parse
             # states are only string inputs and are two characters long
