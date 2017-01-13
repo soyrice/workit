@@ -27,54 +27,42 @@ class get(object):
         self.agg=agg
         self.statesAgg={}
 
-        # find all seriesIDs associated with the state, naics combination and
-        # reassign seriesList with the list of seriesIDs
-        try :
-            statesURL = 'https://script.google.com/macros/s/AKfycbxYuzwcZe6pmlx-fBCeThSbufUvmxeScFy7B4Thf0n34ozIcNk/exec?'
-            statesParams = {}
-            stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
-            if len(stateNames) > 0 :
-                for count in range(0,len(stateNames)) :
-                    statesParams['state%s'%(count)] = stateNames[count]
+        # find all seriesIDs associated with the state, naics combination with web app
+        # and reassign seriesList with the list of seriesIDs
+        statesURL = 'https://script.google.com/macros/s/AKfycbxYuzwcZe6pmlx-fBCeThSbufUvmxeScFy7B4Thf0n34ozIcNk/exec?'
+        statesParams = {}
+        stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
+        if len(stateNames) > 0 :
+            for count in range(0,len(stateNames)) :
+                statesParams['state%s'%(count)] = stateNames[count]
 
-                content = requests.get(statesURL, params=statesParams).json()
-                for stateName in content.keys() :
-                    for counter in range(0,len(self.seriesList)) :
-                        if stateName == self.seriesList[counter] :
-                            self.seriesList[counter] = content[stateName]
-
-                # convert list object into a string to allow regex to parse
-                # states are only string inputs and are two characters long
-                inputsList = []
-                states = re.findall("'([0-9]{2})'", str(self.seriesList))
-                for count in range(0, len(states)) :
-                    try :
-                        naicsList = re.findall("%s(.*)%s"%(states[count], states[count+1]), str(self.seriesList))
-                    except :
-                        naicsList = re.findall("%s(.*)]"%(states[count]), str(self.seriesList))
-
-                inputsList.append(('%s'%(states[count]), re.findall("[0-9]+", str(naicsList))))
-        except :
-            stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
-            if len(stateNames) > 0 :
-                for count in range(0,len(stateNames)) :
-                    stateCode = stateToCode(stateNames[count])
-
-                    for counter in range(0,len(self.seriesList)) :
-                        if stateNames[count] == self.seriesList[counter] :
-                            self.seriesList[counter] = stateCode
+            content = requests.get(statesURL, params=statesParams).json()
+            for stateName in content.keys() :
+                for counter in range(0,len(self.seriesList)) :
+                    if stateName == self.seriesList[counter] :
+                        self.seriesList[counter] = content[stateName]
+                        
+        # sample code to covert from state abbr and names to fips code locall with stateToCode() at bottom
+        # above uses google apps script web app at https://github.com/soyrice/fips-lookup
+##      stateNames = re.findall("'([A-Za-z]+)'", str(self.seriesList))
+##      if len(stateNames) > 0 :
+##          for count in range(0,len(stateNames)) :
+##              stateCode = stateToCode(stateNames[count])
+##              for counter in range(0,len(self.seriesList)) :
+##                  if stateNames[count] == self.seriesList[counter] :
+##                      self.seriesList[counter] = stateCode
 
             # convert list object into a string to allow regex to parse
             # states are only string inputs and are two characters long
             inputsList = []
-            states = re.findall("'([0-9]{2})'", str(self.seriesList))
+            states = re.findall("'([0-9]{2})'", str(self.seriesList)
             for count in range(0, len(states)) :
                 try :
                     naicsList = re.findall("%s(.*)%s"%(states[count], states[count+1]), str(self.seriesList))
                 except :
                     naicsList = re.findall("%s(.*)]"%(states[count]), str(self.seriesList))
 
-                inputsList.append(('%s'%(states[count]), re.findall("[0-9]+", str(naicsList))))
+            inputsList.append(('%s'%(states[count]), re.findall("[0-9]+", str(naicsList))))
 
             # for a given state+naics get all seasonally unadjusted ids
             # for size=establishments, type=all establishments, and each possible ownership codes
@@ -290,7 +278,9 @@ def export(data, tableau='none'):
         with open(time.strftime('%a_%H_%M_%S')+'.csv', 'w') as textFile :
             data.df.to_csv(textFile, index_label='year')
             
-def stateToCode(state):
+def stateToCode(states):
+                                
+    # define codes associated with all state abbr and names
     stateShort = {'AK': '02','AL': '01','AR': '06','AZ': '04','CA': '08','CO': '09','CT': '10',
                   'DC': '12','DE': '11','FL"': '13','GA': '15','HI': '16','IA': '17','ID': '18',
                   'IL': '19','IN': '20','KS': '21','KY': '22','LA': '23','MA': '26','MD': '25',
@@ -299,7 +289,6 @@ def stateToCode(state):
                   'OH': '40','OK': '41','OR': '42','PA': '43','PR': '72','RI': '44','SC': '45',
                   'SD': '46','TN': '47','TX': '48','UT': '49','VI': '78','VT': '50','WA': '53',
                   'WI': '55','WV': '54','WY': '56'}
-    
     stateLong = {'alaska': '02','alabama': '01','arkansas': '06','arizona': '04','california': '08',
                  'colorado': '09','connecticut': '10','district of columbia': '12','delaware': '11',
                  'florida"': '13','georgia': '15','hawaii': '16','iowa': '17','idaho': '18','illinois': '19',
@@ -311,6 +300,7 @@ def stateToCode(state):
                  'south dakota': '46','tennessee': '47','texas': '48','utah': '49','virgin islands': '78','vermont': '50',
                  'washington': '53','wisconsin': '55','west virginia': '54','wyoming': '56'}
     
+    # identify codes associated with each state in function input
     for state in states :
         if state in stateShort.keys() :
             code = stateShort[state]
