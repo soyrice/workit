@@ -7,7 +7,10 @@ A Python wrapper for the getting establishments data from the Bureau of Labor St
 2. From your Python shell or file, import `workit.py` from its local directory:
 
 ```python
-import C:\file\path\workit.py
+import sys
+sys.path.insert(0, '/file/path/workit.py')
+
+import workit
 ```
 
 # Try it out
